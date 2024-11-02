@@ -14,24 +14,25 @@ var recipes []Recipe
 
 func init() {
 	recipes = make([]Recipe, 0)
+	
+	// Load recipes from JSON file (from feature/fetch_all_recipes)
 	file, _ := ioutil.ReadFile("recipes.json")
-	_= json.Unmarshal([]byte(file), &recipes)
+	_ = json.Unmarshal(file, &recipes)
 }
 
 type Recipe struct {
-	Name         string    `json: "name"`
-	Tags         []string  `json:"tags"`
-	ID           string    `json:"ID"`
-	Ingredients  []string  `json:"ingredients"`
-	Instructions []string  `json:"instructions"`
+	Name         string   `json:"name"`
+	Tags         []string `json:"tags"`
+	ID           string   `json:"ID"`
+	Ingredients  []string `json:"ingredients"`
+	Instructions []string `json:"instructions"`
 	PublishedAt  time.Time `json:"publishedAt"`
 }
 
 func NewRecipeHandler(c *gin.Context) {
 	var recipe Recipe
 	if err := c.ShouldBindJSON(&recipe); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	recipe.ID = xid.New().String()
@@ -43,6 +44,7 @@ func NewRecipeHandler(c *gin.Context) {
 func ListRecipesHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, recipes)
 }
+
 func main() {
 	router := gin.Default()
 	router.POST("/recipes", NewRecipeHandler)
