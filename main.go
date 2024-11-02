@@ -1,16 +1,23 @@
 package main
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"time"
-	"github.com/rs/xid"
+
 	"github.com/gin-gonic/gin"
+	"github.com/rs/xid"
 )
 
 var recipes []Recipe
 
 func init() {
 	recipes = make([]Recipe, 0)
+	
+	// Load recipes from JSON file (from feature/fetch_all_recipes)
+	file, _ := ioutil.ReadFile("recipes.json")
+	_ = json.Unmarshal(file, &recipes)
 }
 
 type Recipe struct {
@@ -34,8 +41,13 @@ func NewRecipeHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, recipe)
 }
 
+func ListRecipesHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, recipes)
+}
+
 func main() {
 	router := gin.Default()
 	router.POST("/recipes", NewRecipeHandler)
-	router.Run()
+	router.GET("/recipes", ListRecipesHandler)
+	router.Run(":8081")
 }
